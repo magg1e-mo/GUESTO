@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 632 632" width="512" height="512">
+  <rect x="-60" y="-60" width="632" height="632" fill="#ffffff"/>
+  <!-- top-left: pink -->
+  <rect x="0" y="0" width="240" height="240" rx="30" fill="#f7bfd0"/>
+  <circle cx="240" cy="120" r="48" fill="#ffffff"/>
+  <circle cx="120" cy="238" r="58" fill="#ffffff"/>
+  <!-- bottom-left: mint -->
+  <rect x="0" y="272" width="240" height="240" rx="30" fill="#b7e6cd"/>
+  <circle cx="240" cy="392" r="58" fill="#ffffff"/>
+  <rect x="100" y="236" width="40" height="60" fill="#b7e6cd"/>
+  <circle cx="120" cy="230" r="38" fill="#b7e6cd"/>
+  <!-- bottom-right: sky -->
+  <rect x="272" y="272" width="240" height="240" rx="30" fill="#bcd6f6"/>
+  <circle cx="392" cy="272" r="48" fill="#ffffff"/>
+  <rect x="232" y="372" width="60" height="40" fill="#bcd6f6"/>
+  <circle cx="230" cy="392" r="38" fill="#bcd6f6"/>
+  <!-- question mark, red -->
+  <path d="M338 78 C338 46 362 30 392 30 C424 30 446 50 446 78 C446 108 420 118 404 134 C396 142 394 150 394 164" fill="none" stroke="#e5484d" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="394" cy="206" r="17" fill="#e5484d"/>
+</svg>

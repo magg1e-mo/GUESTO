@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GUESTO</title>
+<meta name="description" content="เกมเปิดช่องทายภาพ 16 ช่อง เปิดได้แค่ 3">
+<meta name="theme-color" content="#f7f5f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GUESTO">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* FC Vision (webfont ลงทะเบียนสำหรับ magg1e-mo.github.io) */
+@font-face{font-family:'FC Vision';font-weight:400;font-style:normal;font-display:swap;src:url(fonts/FCVision-Regular.woff2) format('woff2')}
+@font-face{font-family:'FC Vision';font-weight:500;font-style:normal;font-display:swap;src:url(fonts/FCVision-Medium.woff2) format('woff2')}
+@font-face{font-family:'FC Vision';font-weight:600;font-style:normal;font-display:swap;src:url(fonts/FCVision-SemiBold.woff2) format('woff2')}
+@font-face{font-family:'FC Vision';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/FCVision-Bold.woff2) format('woff2')}
+:root{
+  --paper:#f7f5f0;
+  --surface:#ffffff;
+  --ink:#1f1d1a;
+  --ink-2:#5b5750;
+  --line:#e3dfd6;
+  --tile:#f28c38;
+  --tile-hover:#e87a1f;
+  --accent:#1f1d1a;
+  --accent-ink:#ffffff;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scrollbar-color:#cfc9bb transparent;scrollbar-width:thin;-webkit-text-size-adjust:100%}
+::selection{background:#f2c9bf;color:var(--ink)}
+body{
+  font-family:'FC Vision','Prompt',system-ui,sans-serif;color:var(--ink);background:var(--paper);
+  -webkit-font-smoothing:antialiased;touch-action:manipulation;overscroll-behavior:none;
+  /* keep clear of the iPad status bar (≈24px) and home indicator */
+  padding:
+    calc(max(env(safe-area-inset-top,0px),24px) + 14px)
+    max(env(safe-area-inset-right,0px),20px)
+    calc(max(env(safe-area-inset-bottom,0px),12px) + 14px)
+    max(env(safe-area-inset-left,0px),20px);
+}
+.app{
+  width:100%;max-width:1160px;margin:0 auto;
+  height:calc(100dvh - max(env(safe-area-inset-top,0px),24px) - max(env(safe-area-inset-bottom,0px),12px) - 28px);
+  min-height:560px;display:flex;flex-direction:column;
+}
+button{font-family:inherit}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{width:30px;height:30px;display:block}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line);flex:none}
+.top h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.top .count{font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+#game{flex:1;min-height:0;display:grid;gap:14px;padding-top:14px;
+  grid-template-rows:minmax(0,1fr) 300px;grid-template-columns:minmax(0,1fr)}
+.stage{display:flex;align-items:center;justify-content:center;min-height:0;min-width:0}
+.panel{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:10px;min-height:0}
+
+.status{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.status p{font-size:15px;color:var(--ink-2)}
+.status p b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.pips{display:flex;gap:6px}
+.pip{width:30px;height:6px;border-radius:3px;background:var(--line);transition:background .3s var(--ease)}
+.pip.used{background:var(--ink)}
+
+.board{
+  position:relative;overflow:hidden;border-radius:12px;background-color:var(--tile);
+  background-size:100% 100%;background-repeat:no-repeat;flex:none;
+  box-shadow:0 1px 2px #1f1d1a14,0 8px 24px -8px #1f1d1a26;
+  display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);
+  user-select:none;-webkit-user-select:none;
+}
+.tile{
+  border:0;cursor:pointer;background:var(--tile);color:#6b3200;
+  box-shadow:inset 0 0 0 1px #fff3e4;
+  font-size:clamp(16px,3.2vmin,28px);font-weight:500;font-variant-numeric:tabular-nums;
+  display:grid;place-items:center;
+  transition:background .2s,opacity .5s var(--ease),transform .5s var(--ease),color .2s;
+}
+.tile:hover:not(.open):not(.locked){background:var(--tile-hover);color:#4a2200}
+.tile:active:not(.open):not(.locked){transform:scale(.97)}
+.tile.open{opacity:0;transform:scale(.94);pointer-events:none}
+.tile.locked{cursor:not-allowed;background:#f6c89a;color:#b5884f}
+.tile.shake{animation:nudge .32s}
+@keyframes nudge{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+
+.msg{overflow:auto;min-height:0}
+.hint{font-size:15px;color:var(--ink-2)}
+.btn{
+  width:100%;border:0;cursor:pointer;font-size:18px;font-weight:600;min-height:56px;
+  padding:14px 18px;border-radius:14px;transition:transform .15s var(--ease),background .2s;
+}
+.btn:active{transform:scale(.985)}
+.btn.reveal{background:var(--accent);color:var(--accent-ink)}
+.btn.reveal:hover{background:#38342e}
+.btn.next{background:var(--ink);color:#fff}
+.btn.next:hover{background:#38342e}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.hidden{display:none!important}
+
+.answer{animation:rise .6s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.answer .place{font-size:14px;color:var(--ink-2)}
+.answer h2{font-size:24px;font-weight:600;line-height:1.3;margin:2px 0 4px;letter-spacing:-.01em}
+.answer .alt{font-size:15px;color:var(--ink-2);margin:0 0 8px}
+.answer p{font-size:15px;line-height:1.65;color:var(--ink-2);max-width:62ch}
+
+.final{padding-top:22px;overflow:auto;flex:1;max-width:640px;width:100%;margin:0 auto}
+.final h2{font-size:28px;font-weight:600;letter-spacing:-.01em}
+.final .sub{margin-top:4px;color:var(--ink-2);font-size:15px}
+.final ol{list-style:none;margin:20px 0 22px;border-top:1px solid var(--line)}
+.final li{display:flex;gap:14px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line);font-size:17px}
+.final li i{font-style:normal;width:18px;color:var(--ink-2);font-size:14px;font-variant-numeric:tabular-nums}
+.final li span{font-weight:500}
+.final li small{margin-left:auto;color:var(--ink-2);font-size:14px;text-align:right}
+
+/* iPad portrait (820×1180) and larger portrait tablets */
+@media (min-width:700px){
+  .top h1{font-size:22px}.top .count{font-size:16px}
+  #game{grid-template-rows:minmax(0,1fr) 280px;gap:18px;padding-top:18px}
+  .status p{font-size:17px}
+  .hint,.answer p{font-size:17px}.answer h2{font-size:30px}.answer .alt{font-size:17px}
+  .answer .place{font-size:15px}
+  .btn{font-size:20px;min-height:60px}
+}
+/* iPad landscape (1180×820): board left, controls right */
+@media (min-width:900px) and (orientation:landscape){
+  #game{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) 360px;gap:28px}
+  .panel{padding-top:2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1 class="brand"><img src="icons/icon-192.png" alt="" width="30" height="30">GUESTO</h1>
+    <span class="count" id="round">ภาพที่ 1 จาก 5</span>
+  </header>
+
+  <main id="game">
+    <div class="stage" id="stage"><div class="board" id="board"></div></div>
+    <div class="panel">
+      <div class="status">
+        <p id="left">เปิดได้อีก <b>3</b> ช่อง</p>
+        <div class="pips" id="pips" aria-hidden="true"></div>
+      </div>
+      <div class="msg">
+        <p class="hint" id="hint"></p>
+        <div id="answerBox"></div>
+      </div>
+      <div class="actions">
+        <button class="btn reveal" id="btnReveal">เฉลย</button>
+        <button class="btn next hidden" id="btnNext">ภาพต่อไป</button>
+      </div>
+    </div>
+  </main>
+
+  <section id="final" class="final hidden"></section>
+</div>
+
+<script>
+const IMGS = [{"src": "img/1.jpg", "w": 960, "h": 960}, {"src": "img/2.jpg", "w": 960, "h": 640}, {"src": "img/3.jpg", "w": 960, "h": 540}, {"src": "img/4.jpg", "w": 600, "h": 400}, {"src": "img/5.jpg", "w": 960, "h": 640}];
+const DATA = [
+  {name:"เทศกาลเฟสตา จูนินา (Festa Junina)", place:"บราซิล",
+   note:"งานฉลองกลางปีช่วงเดือนมิถุนายน เด่นที่ธงราวหลากสี กองไฟ ข้าวโพดปิ้ง ป๊อปคอร์น และการแต่งชุดลายสก็อตกับหมวกฟางแบบชาวไร่"},
+  {name:"โฮมคัมมิง (Homecoming) อเมริกัน", place:"สหรัฐอเมริกา",
+   note:"งานต้อนรับศิษย์เก่าของโรงเรียนมัธยม จัดคู่กับเกมฟุตบอลใหญ่ประจำปี ทีมวิ่งเข้าสนามผ่านควันสี ถือธง มีเพื่อนๆ และชุมชนยืนเรียงเชียร์สองข้าง"},
+  {name:"พิธีสวมหมวกขาวจบการศึกษา (Lakkiaiset)", place:"ฟินแลนด์",
+   note:"นักเรียนที่สอบผ่านการสอบเข้ามหาวิทยาลัย (ylioppilas) จะได้สวมหมวกขาวประจำตัว ถือดอกกุหลาบแดง ถ่ายรูปหมู่หน้าอาคาร เป็นวันฉลองใหญ่ของครอบครัวและเพื่อนๆ"},
+  {name:"ประเพณีลอยกระทง", place:"ไทย",
+   note:"คืนวันเพ็ญเดือนสิบสอง ลอยกระทงขอขมาพระแม่คงคา หญิงสาวแต่งชุดไทยและประดับไฟระยิบระยับริมน้ำ"},
+  {name:"วันแห่งความตาย (Día de los Muertos)", place:"เม็กซิโก",
+   note:"เทศกาลระลึกถึงผู้ล่วงลับ ด้วยการแต่งหน้าหัวกะโหลกลวดลายสวย ดอกดาวเรือง เทียน และเสื้อผ้าสีสดแบบมาเรียชิ"}
+];
+
+const MAX_OPEN = 3, N = 16, STAGGER = 40;
+let idx = 0, opened = 0, revealed = false;
+const $ = id => document.getElementById(id);
+const board = $('board');
+
+function fitBoard(){
+  const img = IMGS[idx], r = img.w/img.h, s = $('stage');
+  const W = s.clientWidth, H = s.clientHeight;
+  if(!W||!H) return;
+  const w = Math.min(W, H*r);
+  board.style.width = w+'px'; board.style.height = (w/r)+'px';
+}
+
+function buildRound(){
+  opened = 0; revealed = false;
+  board.style.backgroundImage = `url(${IMGS[idx].src})`;
+  fitBoard();
+  board.innerHTML = '';
+  for(let i=0;i<N;i++){
+    const t = document.createElement('button');
+    t.className='tile'; t.textContent=i+1;
+    t.setAttribute('aria-label','เปิดช่องที่ '+(i+1));
+    t.addEventListener('click',()=>openTile(t));
+    board.appendChild(t);
+  }
+  $('answerBox').innerHTML='';
+  $('btnReveal').classList.remove('hidden');
+  $('btnNext').classList.add('hidden');
+  $('hint').textContent='แตะช่องเพื่อเปิด แล้วเดาว่าเป็นงานอะไร';
+  $('round').textContent = `ภาพที่ ${idx+1} จาก ${DATA.length}`;
+  renderStatus();
+}
+
+function renderStatus(){
+  const left = MAX_OPEN-opened;
+  $('pips').innerHTML = Array.from({length:MAX_OPEN},(_,i)=>`<span class="pip ${i<opened?'used':''}"></span>`).join('');
+  $('left').innerHTML = revealed ? 'เฉลยแล้ว' : left>0 ? `เปิดได้อีก <b>${left}</b> ช่อง` : 'ใช้สิทธิ์เปิดครบแล้ว';
+  if(!revealed) board.querySelectorAll('.tile:not(.open)').forEach(t=>t.classList.toggle('locked',left===0));
+}
+
+function openTile(t){
+  if(revealed || t.classList.contains('open')) return;
+  if(opened>=MAX_OPEN){
+    t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake');
+    $('hint').textContent='เปิดครบ 3 ช่องแล้ว กดเฉลยได้เลย';
+    return;
+  }
+  t.classList.add('open'); opened++;
+  renderStatus();
+  $('hint').textContent = opened>=MAX_OPEN ? 'เปิดครบ 3 ช่องแล้ว ตัดสินใจแล้วกดเฉลย' : '';
+}
+
+function reveal(){
+  if(revealed) return;
+  revealed = true;
+  [...board.querySelectorAll('.tile')].forEach((t,i)=>{
+    if(!t.classList.contains('open')) setTimeout(()=>{t.classList.remove('locked');t.classList.add('open')}, i*STAGGER);
+  });
+  const d = DATA[idx];
+  $('hint').textContent='';
+  setTimeout(()=>{
+    $('answerBox').innerHTML = `<div class="answer"><p class="place">${d.place}</p><h2>${d.name.split(' (')[0]}</h2>${d.name.includes(' (')?`<p class="alt">${d.name.split(' (')[1].replace(')','')}</p>`:''}<p>${d.note}</p></div>`;
+  }, N*STAGGER+120);
+  $('btnReveal').classList.add('hidden');
+  $('btnNext').textContent = idx===DATA.length-1 ? 'ดูสรุป' : 'ภาพต่อไป';
+  $('btnNext').classList.remove('hidden');
+  $('hint').textContent='';
+  renderStatus();
+}
+
+function next(){
+  if(idx<DATA.length-1){ idx++; buildRound(); }
+  else showFinal();
+}
+
+function showFinal(){
+  $('game').classList.add('hidden');
+  const f=$('final'); f.classList.remove('hidden');
+  f.innerHTML = `<h2>ครบ ${DATA.length} ภาพแล้ว</h2><p class="sub">สรุปเทศกาลที่เล่นไปทั้งหมด</p>
+    <ol>${DATA.map((d,i)=>`<li><i>${i+1}</i><span>${d.name.split(' (')[0]}</span><small>${d.place}</small></li>`).join('')}</ol>
+    <button class="btn line" id="again">เล่นอีกครั้ง</button>`;
+  $('again').onclick=()=>{ idx=0; f.classList.add('hidden'); $('game').classList.remove('hidden'); buildRound(); };
+  $('round').textContent='จบเกม';
+  window.scrollTo({top:0});
+}
+
+$('btnReveal').onclick=reveal;
+$('btnNext').onclick=next;
+new ResizeObserver(fitBoard).observe($('stage'));
+buildRound();
+</script>
+</body>
+</html>
